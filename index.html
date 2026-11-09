@@ -52,7 +52,9 @@ code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9em;background
 .prog{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:.85rem;color:var(--muted);font-variant-numeric:tabular-nums}
 .bar{width:140px;height:8px;border-radius:99px;background:var(--line);overflow:hidden}
 .bar i{display:block;height:100%;width:0;background:var(--teal)}
-.menu-btn{display:none;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:6px 12px;font-weight:500}
+.menu-btn{display:inline-flex;align-items:center;gap:8px;flex:none;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:6px 12px;font-weight:500}
+.menu-btn:hover{border-color:var(--teal)}
+.menu-btn[aria-expanded="true"]{background:var(--teal-soft);border-color:var(--teal)}
 
 .shell{position:relative;display:grid;grid-template-columns:330px minmax(0,1fr);min-height:0}
 nav{min-height:0;overflow:auto;background:var(--surface);border-right:1px solid var(--line);padding:14px 12px 28px}
@@ -79,7 +81,7 @@ main:focus{outline:none}
 .phase-link{display:block;margin:2px 0 2px 0;padding:4px 8px;font-size:.82rem;color:var(--t);text-decoration:none;font-weight:500}
 .phase-link:hover{text-decoration:underline}
 
-.wrap{max-width:70ch}
+.wrap{max-width:min(100%,56rem);margin-inline:auto}
 .crumb{font-size:.85rem;color:var(--muted);margin:0 0 10px}
 .crumb a{color:var(--t);text-decoration:none;font-weight:500}
 .crumb a:hover{text-decoration:underline}
@@ -306,11 +308,20 @@ details.rgrp>summary,details.src>summary{flex-wrap:nowrap;align-items:center}
 details.rgrp>summary>span,details.src>summary>span{flex:1 1 auto;min-width:0}
 details.rgrp>summary>small,details.src>summary>small{flex:none;white-space:nowrap}
 
+/* menu: close button and hide/show on wide screens */
+.nav-top{position:sticky;top:-14px;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:10px;margin:-14px -12px 12px;padding:12px 12px 10px;background:var(--surface);border-bottom:1px solid var(--line)}
+.nav-ttl{font-family:var(--display);font-weight:600;font-size:.95rem}
+.nav-close{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:5px 10px;font-size:.85rem;font-weight:500}
+.nav-close:hover{border-color:var(--teal)}
+@media (min-width:881px){
+  .shell.nav-off{grid-template-columns:minmax(0,1fr)}
+  .shell.nav-off nav{display:none}
+}
+
 @media (max-width:880px){
   .shell{grid-template-columns:minmax(0,1fr)}
   nav{display:none;position:absolute;inset:0;z-index:5;border-right:0}
   nav.open{display:block}
-  .menu-btn{display:inline-block}
   .bar{width:70px;flex:none}
   .prog{white-space:nowrap}
   .top{padding:10px 16px;gap:10px}
@@ -325,7 +336,7 @@ details.rgrp>summary>small,details.src>summary>small{flex:none;white-space:nowra
 <body>
 <div class="app">
   <header class="top">
-    <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="index">Index</button>
+    <button class="menu-btn" id="menuBtn" type="button" aria-expanded="true" aria-controls="index"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h12M2 8h12M2 12h12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Menu</span></button>
     <a class="brand" href="#">SEO Study Guide<small>Beginner roadmap, 7 phases, about 26 weeks</small></a>
     <div class="prog" aria-live="polite"><span id="progText">0 of 0 learned</span><div class="bar" aria-hidden="true"><i id="progBar"></i></div></div>
   </header>
@@ -1553,7 +1564,7 @@ var SOURCEMAP = {
 };
 
 /* Dates, change log and templates */
-var GUIDE_UPDATED = "6 Nov 2026";
+var GUIDE_UPDATED = "9 Nov 2026";
 var REVIEWED = "November 2026";
 var pendingGQ = "";
 
@@ -1577,6 +1588,9 @@ var VOLATILE = {
 };
 
 var CHANGELOG = [
+  {d:"9 Nov 2026",t:"Menu you can close, tidier layout",b:[
+    "The side menu now has a Close menu button, and a Menu button in the top bar brings it back. Your choice is remembered on wide screens.",
+    "Reading pages are centered and a little wider, so there is less empty space on the right."]},
   {d:"6 Nov 2026",t:"Claude skills links",b:[
     "Two new groups on the Sources page with " + SKILL_KEYS.length + " links: how to learn, set up and write Claude skills, and community-made skills for SEO work.",
     "The community skills are tagged Third party, with a reminder to read a skill before you install it."]},
@@ -1700,7 +1714,7 @@ function termBox(){
 
 function viewGlossary(){
   var items = GLOSS.map(function(g){ return g; }).sort(function(a, b){ return a[0].toLowerCase() < b[0].toLowerCase() ? -1 : 1; });
-  var h = '<div class="wrap tone-a" style="max-width:76ch"><p class="crumb"><a href="#">All phases</a> / Glossary</p>' +
+  var h = '<div class="wrap tone-a"><p class="crumb"><a href="#">All phases</a> / Glossary</p>' +
     '<h1>Plain-English glossary</h1><p class="lead">New to this? Start with the big picture, then look up any word you meet.</p>' +
     '<h2>SEO in one minute</h2><ol class="oneminute">' +
     '<li>A website is a set of pages. Each page has its own address, called a URL.</li>' +
@@ -1755,7 +1769,7 @@ function fmt(s){ return esc(s).replace(/`([^`]+)`/g,"<code>$1</code>"); }
 function toneClass(p){ return "tone-" + p.tone; }
 
 function buildNav(){
-  var h = '<div class="hub"><a href="#setup">Day 1 setup<small>Get tracking working</small></a><a href="#quick">Quick reference<small>Target numbers</small></a><a href="#tools">Tools<small>Free and paid</small></a><a href="#templates">Templates<small>Sheets to copy</small></a><a href="#glossary">Glossary<small>Plain English</small></a><a href="#backup">Notes and backup<small>Save your work</small></a><a href="#resources">Sources<small>Official links and updates</small></a></div><input class="search" id="q" type="search" placeholder="Search everything" aria-label="Search topics, steps, tools and your notes"><div class="sres" id="sres" aria-live="polite"></div>';
+  var h = '<div class="nav-top"><span class="nav-ttl">Menu</span><button type="button" class="nav-close" id="navClose"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 2l8 8M10 2l-8 8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Close menu</button></div><div class="hub"><a href="#setup">Day 1 setup<small>Get tracking working</small></a><a href="#quick">Quick reference<small>Target numbers</small></a><a href="#tools">Tools<small>Free and paid</small></a><a href="#templates">Templates<small>Sheets to copy</small></a><a href="#glossary">Glossary<small>Plain English</small></a><a href="#backup">Notes and backup<small>Save your work</small></a><a href="#resources">Sources<small>Official links and updates</small></a></div><input class="search" id="q" type="search" placeholder="Search everything" aria-label="Search topics, steps, tools and your notes"><div class="sres" id="sres" aria-live="polite"></div>';
   PHASES.forEach(function(p, pi){
     h += '<section class="ph ' + toneClass(p) + '" data-pi="' + pi + '">' +
       '<button class="ph-head" aria-expanded="false"><span class="num">' + p.n + '</span>' +
@@ -1989,7 +2003,7 @@ var ASKS = [
 ];
 
 function viewQuick(){
-  var h = '<div class="wrap tone-a" style="max-width:80ch"><p class="crumb"><a href="#">All phases</a> / Quick reference</p>' +
+  var h = '<div class="wrap tone-a"><p class="crumb"><a href="#">All phases</a> / Quick reference</p>' +
     '<h1>Quick reference</h1><p class="lead">The numbers worth remembering, and which tool answers which question.</p>' +
     '<h2>Core Web Vitals at a glance</h2><div class="tw"><table class="qt"><thead><tr><th scope="col">Measures</th><th scope="col">Good</th><th scope="col">Needs improvement</th><th scope="col">Poor</th></tr></thead><tbody>' +
     '<tr><td>LCP, how fast the main content appears</td><td>2.5 seconds or less</td><td>2.5 to 4 seconds</td><td>Over 4 seconds</td></tr>' +
@@ -2024,7 +2038,7 @@ function viewTools(){
   var counts = {all:0, free:0, mix:0, paid:0};
   Object.keys(TOOLS).forEach(function(k){ counts.all++; counts[TOOLS[k].t]++; });
   var opts = [["all","All"],["free","Free"],["mix","Free + paid"],["paid","Paid"]];
-  var h = '<div class="wrap tone-a" style="max-width:80ch"><p class="crumb"><a href="#">All phases</a> / Tools</p>' +
+  var h = '<div class="wrap tone-a"><p class="crumb"><a href="#">All phases</a> / Tools</p>' +
     '<h1>Tools directory</h1><p class="lead">Every tool mentioned in this guide, grouped by job. A beginner can do almost everything here with free tools.</p>' +
     '<div class="plat" role="group" aria-label="Show tools by price">' + opts.map(function(o){
       return '<button type="button" class="chip" data-tf="' + o[0] + '" aria-pressed="' + (toolFilter === o[0] ? "true" : "false") + '">' + o[1] + ' (' + counts[o[0]] + ')</button>';
@@ -2244,7 +2258,7 @@ function sourcesHtml(id){
     '<p class="hint">Links open in a new tab. <a href="#resources">See all sources and update feeds</a>.</p></div></details>';
 }
 function viewResources(){
-  var h = '<div class="wrap tone-a" style="max-width:80ch"><p class="crumb"><a href="#">All phases</a> / Sources and updates</p>' +
+  var h = '<div class="wrap tone-a"><p class="crumb"><a href="#">All phases</a> / Sources and updates</p>' +
     '<h1>Sources and latest updates</h1>' +
     '<p class="lead">Search changes all the time, so a guide like this is never the last word. These are the places where the rules, tools and news appear first. Links last checked ' + esc(LINKS_CHECKED) + '.</p>' +
     '<div class="task"><b>Your monthly 15-minute check</b><ol class="mc">' +
@@ -2349,7 +2363,7 @@ function tplHtml(id){
 }
 
 function viewTemplates(){
-  var h = '<div class="wrap tone-a" style="max-width:80ch"><p class="crumb"><a href="#">All phases</a> / Templates</p>' +
+  var h = '<div class="wrap tone-a"><p class="crumb"><a href="#">All phases</a> / Templates</p>' +
     '<h1>Templates</h1><p class="lead">Four ready-made sheets. Download one and open it in Excel, or import it into Google Sheets (File, Import). If the download does not start, use the copy-and-paste box under it.</p>';
   TEMPLATES.forEach(function(t){
     h += '<article class="tcard"><h2>' + esc(t.title) + '</h2><p>' + esc(t.desc) + '</p>' +
@@ -2527,15 +2541,43 @@ function route(){
   syncNav();
   viewEl.scrollTop = 0;
   navEl.classList.remove("open");
-  menuBtn.setAttribute("aria-expanded","false");
+  syncMenu();
   var cur = navEl.querySelector('[aria-current="page"]');
   if (cur && cur.scrollIntoView) { try { cur.scrollIntoView({block:"nearest"}); } catch(e){} }
 }
 
-menuBtn.addEventListener("click", function(){
-  var open = navEl.classList.toggle("open");
-  menuBtn.setAttribute("aria-expanded", open ? "true" : "false");
+/* Menu: on wide screens it hides and shows the side menu (remembered); on narrow screens it opens and closes the full-screen menu. */
+var shellEl = document.querySelector(".shell");
+var NAV_KEY = "seo-study-guide-nav";
+var navOff = false;
+try { navOff = localStorage.getItem(NAV_KEY) === "off"; } catch (e) {}
+var narrowQ = window.matchMedia ? window.matchMedia("(max-width:880px)") : null;
+function isNarrow(){ return !!(narrowQ && narrowQ.matches); }
+function navShown(){ return isNarrow() ? navEl.classList.contains("open") : !navOff; }
+function syncMenu(){
+  shellEl.classList.toggle("nav-off", navOff);
+  var shown = navShown();
+  menuBtn.setAttribute("aria-expanded", shown ? "true" : "false");
+  menuBtn.setAttribute("aria-label", shown ? "Hide menu" : "Show menu");
+}
+function setNav(show){
+  if (isNarrow()) { navEl.classList.toggle("open", show); }
+  else { navOff = !show; try { localStorage.setItem(NAV_KEY, navOff ? "off" : "on"); } catch (e) {} }
+  syncMenu();
+}
+menuBtn.addEventListener("click", function(){ setNav(!navShown()); });
+navEl.addEventListener("click", function(e){
+  var c = e.target.closest ? e.target.closest("#navClose") : null;
+  if (c) { setNav(false); menuBtn.focus(); }
 });
+document.addEventListener("keydown", function(e){
+  if (e.key === "Escape" && isNarrow() && navEl.classList.contains("open")) { setNav(false); menuBtn.focus(); }
+});
+if (narrowQ) {
+  var onNarrow = function(){ navEl.classList.remove("open"); syncMenu(); };
+  if (narrowQ.addEventListener) narrowQ.addEventListener("change", onNarrow); else if (narrowQ.addListener) narrowQ.addListener(onNarrow);
+}
+syncMenu();
 viewEl.addEventListener("click", function(e){
   var b = e.target.closest ? e.target.closest(".term") : null;
   var box = document.getElementById("termbox");
